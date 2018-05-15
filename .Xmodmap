@@ -1,0 +1,6 @@
+!! No Caps Lock
+clear lock
+!! Make caps lock an Escape Key
+keycode 0x42 = Return
+!! Make "win key" apostrophe
+keysym Super_L = apostrophe
