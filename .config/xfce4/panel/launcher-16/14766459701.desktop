@@ -1,0 +1,15 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Exec=xterm -e irssi
+Icon=/home/ncs/Pictures/irssi-icon.png
+StartupNotify=false
+Terminal=false
+Categories=Utility;X-XFCE;X-Xfce-Toplevel;
+OnlyShowIn=XFCE;
+Name=Run Program...
+Name[en_GB]=IRSSI
+Comment=Run a program
+Comment[en_GB]=
+X-XFCE-Source=file:///usr/share/applications/xfce4-run.desktop
+Path=

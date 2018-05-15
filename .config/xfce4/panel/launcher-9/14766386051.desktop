@@ -1,0 +1,15 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Exec=xterm
+Icon=xterm-color
+StartupNotify=false
+Terminal=false
+Categories=Utility;X-XFCE;X-Xfce-Toplevel;
+OnlyShowIn=XFCE;
+Name=Terminal Emulator
+Name[en_GB]=XTerm
+Comment=Use the command line
+Comment[en_GB]=standard terminal emulator for the X window system
+X-XFCE-Source=file:///usr/share/applications/exo-terminal-emulator.desktop
+Path=
