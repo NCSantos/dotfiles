@@ -1,4 +1,4 @@
-et guicursor+=a:blinkon0
+set guicursor+=a:blinkon0
 if has('gui_gtk')
   set guifont=DejaVu\ Sans\ Mono\ 12
 else
