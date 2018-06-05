@@ -5,8 +5,8 @@ XTerm*background: #080808
 XTerm*foreground: #7374ff
 XTerm*faceName: inconsolata
 XTerm*faceSize: 8
-XTerm*faceSize1: 15
-XTerm*faceSize2: 16
+XTerm*faceSize1: 10
+XTerm*faceSize2: 12
 XTerm*faceSize3: 17
 XTerm*faceSize4: 18
 XTerm*faceSize5: 19
