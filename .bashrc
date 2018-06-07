@@ -124,15 +124,20 @@ fi
 
 gobin=/usr/local/go/bin
 gohome=$HOME/Documents/go
+gohomebin=$gohome/bin
 
 case ":${PATH:=$gobin}:" in
   *:$gobin:*) ;;
   *) PATH="$PATH:$gobin"  ;;
 esac
 
-case ":${PATH:=$gohome}:" in
-  *:$gohome:*) ;;
-  *) export GOPATH=$gohome  ;;
+# if I try to set this has in previous case GOPATH is not properly exported,
+# vim doesn't see it.
+export GOPATH=$gohome
+
+case ":${PATH:=$gohomebin}:" in
+  *:$gohomebin:*) ;;
+  *) PATH="$PATH:$gohomebin"  ;;
 esac
 
 alias dotfiles='/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'
