@@ -349,6 +349,10 @@ nnoremap <leader>vb :ls<CR>:vert sb<space><C-z><S-Tab>
 
 nnoremap <leader>cd :cd %:p:h<CR>:pwd<CR>
 
+" Display next/prev error
+nnoremap <leader>cn :cn<CR>
+nnoremap <leader>cp :cp<CR>
+
 """ Abbreviations
 function! EatChar(pat)
   let c = nr2char(getchar(0))
