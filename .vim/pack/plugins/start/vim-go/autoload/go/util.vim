@@ -36,15 +36,9 @@ function! go#util#Join(...) abort
 endfunction
 
 " IsWin returns 1 if current OS is Windows or 0 otherwise
+" Note that has('win32') is always 1 when has('win64') is 1, so has('win32') is enough.
 function! go#util#IsWin() abort
-  let win = ['win16', 'win32', 'win64', 'win95']
-  for w in win
-    if (has(w))
-      return 1
-    endif
-  endfor
-
-  return 0
+  return has('win32')
 endfunction
 
 " IsMac returns 1 if current OS is macOS or 0 otherwise.
@@ -68,18 +62,7 @@ endfunction
 " The (optional) first parameter can be added to indicate the 'cwd' or 'env'
 " parameters will be used, which wasn't added until a later version.
 function! go#util#has_job(...) abort
-  if has('nvim')
-    return 1
-  endif
-
-  " cwd and env parameters to job_start was added in this version.
-  if a:0 > 0 && a:1 is 1
-    return has('job') && has("patch-8.0.0902")
-  endif
-
-  " job was introduced in 7.4.xxx however there are multiple bug fixes and one
-  " of the latest is 8.0.0087 which is required for a stable async API.
-  return has('job') && has("patch-8.0.0087")
+  return has('job') || has('nvim')
 endfunction
 
 let s:env_cache = {}
@@ -137,9 +120,31 @@ function! go#util#gomod() abort
   return substitute(s:exec(['go', 'env', 'GOMOD'])[0], '\n', '', 'g')
 endfunction
 
-
 function! go#util#osarch() abort
   return go#util#env("goos") . '_' . go#util#env("goarch")
+endfunction
+
+" go#util#ModuleRoot returns the root directory of the module of the current
+" buffer.
+function! go#util#ModuleRoot() abort
+  let [l:out, l:err] = go#util#ExecInDir(['go', 'env', 'GOMOD'])
+  if l:err != 0
+    return -1
+  endif
+
+  let l:module = split(l:out, '\n', 1)[0]
+
+  " When run with `GO111MODULE=on and not in a module directory, the module will be reported as /dev/null.
+  let l:fakeModule = '/dev/null'
+  if go#util#IsWin()
+    let l:fakeModule = 'NUL'
+  endif
+
+  if l:fakeModule == l:module
+    return expand('%:p:h')
+  endif
+
+  return fnamemodify(l:module, ':p:h')
 endfunction
 
 " Run a shell command.
@@ -446,7 +451,7 @@ function! go#util#tempdir(prefix) abort
   endif
 
   " Not great randomness, but "good enough" for our purpose here.
-  let l:rnd = sha256(printf('%s%s', localtime(), fnamemodify(bufname(''), ":p")))
+  let l:rnd = sha256(printf('%s%s', reltimestr(reltime()), fnamemodify(bufname(''), ":p")))
   let l:tmp = printf("%s/%s%s", l:dir, a:prefix, l:rnd)
   call mkdir(l:tmp, 'p', 0700)
   return l:tmp
@@ -517,6 +522,53 @@ function! go#util#ShowInfo(info)
   endif
 
   echo "vim-go: " | echohl Function | echon a:info | echohl None
+endfunction
+
+" go#util#SetEnv takes the name of an environment variable and what its value
+" should be and returns a function that will restore it to its original value.
+function! go#util#SetEnv(name, value) abort
+  let l:state = {}
+
+  if len(a:name) == 0
+    return function('s:noop', [], l:state)
+  endif
+
+  let l:remove = 0
+  if exists('$' . a:name)
+    let l:oldvalue = eval('$' . a:name)
+  else
+    let l:remove = 1
+  endif
+
+  " wrap the value in single quotes so that it will work on windows when there
+  " are backslashes present in the value (e.g. $PATH).
+  call execute('let $' . a:name . " = '" . a:value . "'")
+
+  if l:remove
+    return function('s:unset', [a:name], l:state)
+  endif
+
+  return function('go#util#SetEnv', [a:name, l:oldvalue], l:state)
+endfunction
+
+function! s:unset(name) abort
+  try
+    " unlet $VAR was introducted in Vim 8.0.1832, which is newer than the
+    " minimal version that vim-go supports. Set the environment variable to
+    " the empty string in that case. It's not perfect, but it will work fine
+    " for most things, and is really the best alternative that's available.
+    if !has('patch-8.0.1832')
+      call go#util#SetEnv(a:name, '')
+      return
+    endif
+
+    call execute('unlet $' . a:name)
+  catch
+    call go#util#EchoError(printf('could not unset $%s: %s', a:name, v:exception))
+  endtry
+endfunction
+
+function! s:noop(...) abort dict
 endfunction
 
 " restore Vi compatibility settings
