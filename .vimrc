@@ -241,6 +241,7 @@ if has("autocmd")
     au Filetype go nmap <silent> <leader>gi <Plug>(go-imports)
     au Filetype go nmap <silent> <leader>gb :wa<CR><bar><Plug>(go-build)
     au Filetype go nmap <silent> <leader>gd :GoDecls<CR>
+    au Filetype go nmap <silent> <leader>gf <Plug>(go-def-vertical)
   augroup END
 endif
 
