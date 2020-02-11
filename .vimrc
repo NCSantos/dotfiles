@@ -253,6 +253,9 @@ colorscheme inkpot
 
 let mapleader = ","
 
+" Completition
+inoremap <leader><leader> <C-X><C-O>
+
 " Make [[ and ]] work even if the { is not in the first column
 nnoremap <silent> [[ :call search('^\S\@=.*{$', 'besW')<CR>
 nnoremap <silent> ]] :call search('^\S\@=.*{$', 'esW')<CR>
@@ -328,7 +331,7 @@ nnoremap <leader>t :NERDTree<CR>
 
 imap jj <ESC>
 
-nnoremap <leader><leader> q:
+" nnoremap <leader><leader> q:
 
 inoremap <C-b> <C-x><C-l>
 
