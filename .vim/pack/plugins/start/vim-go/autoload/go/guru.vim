@@ -404,30 +404,17 @@ endfunction
 
 " Show all refs to entity denoted by selected identifier
 function! go#guru#Referrers(selected) abort
-  let l:mode = go#config#ReferrersMode()
-  if l:mode == 'guru'
-    let args = {
-            \ 'mode': 'referrers',
-            \ 'format': 'plain',
-            \ 'selected': a:selected,
-            \ 'needs_scope': 0,
-            \ }
+  let args = {
+          \ 'mode': 'referrers',
+          \ 'format': 'plain',
+          \ 'selected': a:selected,
+          \ 'needs_scope': 0,
+          \ }
 
-    call s:run_guru(args)
-    return
-  elseif l:mode == 'gopls'
-    let [l:line, l:col] = getpos('.')[1:2]
-    let [l:line, l:col] = go#lsp#lsp#Position(l:line, l:col)
-    let l:fname = expand('%:p')
-    call go#lsp#Referrers(l:fname, l:line, l:col, funcref('s:parse_guru_output'))
-    return
-  else
-    call go#util#EchoWarning('unknown value for g:go_referrers_mode')
-  endif
+  call s:run_guru(args)
 endfunction
 
 function! go#guru#SameIds(showstatus) abort
-
   " check if the version of Vim being tested supports matchaddpos()
   if !exists("*matchaddpos")
     call go#util#EchoError("GoSameIds requires 'matchaddpos'. Update your Vim/Neovim version.")
@@ -490,14 +477,18 @@ function! s:same_ids_highlight(exit_val, output, mode) abort
     let l:matches = add(l:matches, [str2nr(pos[-2]), str2nr(pos[-1]), str2nr(poslen)])
   endfor
 
-  call matchaddpos('goSameId', l:matches)
+  call go#util#HighlightPositions('goSameId', l:matches)
 
   if go#config#AutoSameids()
     " re-apply SameIds at the current cursor position at the time the buffer
     " is redisplayed: e.g. :edit, :GoRename, etc.
     augroup vim-go-sameids
       autocmd! * <buffer>
-      autocmd BufWinEnter <buffer> nested call go#guru#SameIds(0)
+      if has('textprop')
+        autocmd BufReadPost <buffer> nested call go#guru#SameIds(0)
+      else
+        autocmd BufWinEnter <buffer> nested call go#guru#SameIds(0)
+      endif
     augroup end
   endif
 endfunction
@@ -505,7 +496,7 @@ endfunction
 " ClearSameIds returns 0 when it removes goSameId groups and non-zero if no
 " goSameId groups are found.
 function! go#guru#ClearSameIds() abort
-  let l:cleared = go#util#ClearGroupFromMatches('goSameId')
+  let l:cleared = go#util#ClearHighlights('goSameId')
 
   if !l:cleared
     return 1
@@ -561,11 +552,11 @@ function! s:parse_guru_output(exit_val, output, title) abort
 
   let errformat = "%f:%l.%c-%[%^:]%#:\ %m,%f:%l:%c:\ %m"
   let l:listtype = go#list#Type("_guru")
-  call go#list#ParseFormat(l:listtype, errformat, a:output, a:title)
+  call go#list#ParseFormat(l:listtype, errformat, a:output, a:title, 0)
 
   let errors = go#list#Get(l:listtype)
   call go#list#Window(l:listtype, len(errors))
-endfun
+endfunction
 
 function! go#guru#Scope(...) abort
   if a:0
