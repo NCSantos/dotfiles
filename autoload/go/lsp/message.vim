@@ -21,6 +21,11 @@ function! go#lsp#message#Initialize(wd) abort
                 \ 'hover': {
                   \ 'contentFormat': ['plaintext'],
                 \ },
+                \ 'completion': {
+                \   'completionItem': {
+                \     'snippetSupport': go#config#GoplsUsePlaceholders() ? v:true : v:false,
+                \   },
+                \ },
               \ }
             \ },
             \ 'workspaceFolders': [s:workspaceFolder(0, a:wd)],
@@ -40,6 +45,21 @@ function! go#lsp#message#Shutdown() abort
   return {
           \ 'notification': 0,
           \ 'method': 'shutdown',
+       \ }
+endfunction
+
+function! go#lsp#message#Format(file) abort
+  return {
+          \ 'notification': 0,
+          \ 'method': 'textDocument/formatting',
+          \ 'params': {
+          \   'textDocument': {
+          \       'uri': go#path#ToURI(a:file)
+          \   },
+          \   'options': {
+          \     'insertSpaces': v:false,
+          \   },
+          \ }
        \ }
 endfunction
 
@@ -80,7 +100,7 @@ function! go#lsp#message#TypeDefinition(file, line, col) abort
        \ }
 endfunction
 
-function! go#lsp#message#DidOpen(file, content) abort
+function! go#lsp#message#DidOpen(file, content, version) abort
   return {
           \ 'notification': 1,
           \ 'method': 'textDocument/didOpen',
@@ -89,18 +109,20 @@ function! go#lsp#message#DidOpen(file, content) abort
           \         'uri': go#path#ToURI(a:file),
           \         'languageId': 'go',
           \         'text': a:content,
+          \         'version': a:version,
           \     }
           \ }
        \ }
 endfunction
 
-function! go#lsp#message#DidChange(file, content) abort
+function! go#lsp#message#DidChange(file, content, version) abort
   return {
           \ 'notification': 1,
           \ 'method': 'textDocument/didChange',
           \ 'params': {
           \     'textDocument': {
           \         'uri': go#path#ToURI(a:file),
+          \         'version': a:version,
           \     },
           \     'contentChanges': [
           \       {
@@ -190,14 +212,61 @@ function! go#lsp#message#ConfigurationResult(items) abort
     let l:config = {
           \ 'buildFlags': [],
           \ 'hoverKind': 'NoDocumentation',
-          \ 'deepCompletion': go#config#GoplsDeepCompletion() ? v:true : v:false,
-          \ 'fuzzyMatching': go#config#GoplsFuzzyMatching() ? v:true : v:false,
-          \ 'completeUnimported': go#config#GoplsCompleteUnimported() ? v:true : v:false,
-          \ 'usePlaceholders': go#config#GoplsUsePlaceholders() ? v:true : v:false,
           \ }
     let l:buildtags = go#config#BuildTags()
     if buildtags isnot ''
       let l:config.buildFlags = extend(l:config.buildFlags, ['-tags', go#config#BuildTags()])
+    endif
+
+    let l:deepCompletion = go#config#GoplsDeepCompletion()
+    let l:matcher = go#config#GoplsMatcher()
+    let l:completeUnimported = go#config#GoplsCompleteUnimported()
+    let l:staticcheck = go#config#GoplsStaticCheck()
+    let l:usePlaceholder = go#config#GoplsUsePlaceholders()
+    let l:tempModfile = go#config#GoplsTempModfile()
+
+    if l:deepCompletion isnot v:null
+      if l:deepCompletion
+        let l:config.deepCompletion = v:true
+      else
+        let l:config.deepCompletion = v:false
+      endif
+    endif
+
+    if l:matcher isnot v:null
+        let l:config.matcher = l:matcher
+    endif
+
+    if l:completeUnimported isnot v:null
+      if l:completeUnimported
+        let l:config.completeUnimported = v:true
+      else
+        let l:config.completeUnimported = v:false
+      endif
+    endif
+
+    if l:staticcheck isnot v:null
+      if l:staticcheck
+        let l:config.staticcheck = v:true
+      else
+        let l:config.staticcheck = v:false
+      endif
+    endif
+
+    if l:usePlaceholder isnot v:null
+      if l:usePlaceholder
+        let l:config.usePlaceholders = v:true
+      else
+        let l:config.usePlaceholders = v:false
+      endif
+    endif
+
+    if l:tempModfile isnot v:null
+      if l:tempModfile
+        let l:config.tempModfile = v:true
+      else
+        let l:config.tempModfile = v:false
+      endif
     endif
 
     let l:result = add(l:result, l:config)

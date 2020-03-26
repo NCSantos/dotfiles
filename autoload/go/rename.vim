@@ -20,7 +20,7 @@ function! go#rename#Rename(bang, ...) abort
     let to_identifier = a:1
   endif
 
-  let l:bin = go#config#GorenameCommand()
+  let l:bin = go#config#RenameCommand()
 
   " return with a warning if the bin doesn't exist
   let bin_path = go#path#CheckBinPath(l:bin)
@@ -42,7 +42,7 @@ function! go#rename#Rename(bang, ...) abort
     call go#util#EchoWarning('unexpected rename command')
   endif
 
-  let l:cmd = extend([l:bin], l:args)
+  let l:cmd = extend([l:bin_path], l:args)
 
   if go#util#has_job()
     call s:rename_job({
