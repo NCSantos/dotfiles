@@ -132,8 +132,8 @@ set statusline=%<%F%h%m%r%h%w\ %y\ [BUF=%n]\ %{&ff}%=\ lin:%l\,%L\ col:%c%V\ pos
 """" Tabs/Indent Levels
 set autoindent " Do dumb autoindentation when no filetype is set
 set tabstop=8 " Real tab characters are 8 spaces wide,
-set shiftwidth=2 " but an indent level is 2 spaces wide.
-set softtabstop=2 " <BS> over an autoindent deletes both spaces.
+set shiftwidth=4 " but an indent level is 2 spaces wide.
+set softtabstop=4 " <BS> over an autoindent deletes both spaces.
 set expandtab " Use spaces, not tabs, for autoindent/tab key.
 
 """" Tags
@@ -247,7 +247,7 @@ endif
 
 """ Colorscheme
 let g:inkpot_black_background=1
-colorscheme inkpot
+colorscheme apprentice
 
 """ Key Mappings
 
