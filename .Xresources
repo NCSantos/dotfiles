@@ -1,6 +1,6 @@
 XTerm*termName: xterm-256color
-XTerm*background: #080808
-!XTerm*background: #262626
+!XTerm*background: #080808
+XTerm*background: #262626
 !XTerm*foreground: #959eed
 XTerm*foreground: #7374ff
 XTerm*faceName: inconsolata
