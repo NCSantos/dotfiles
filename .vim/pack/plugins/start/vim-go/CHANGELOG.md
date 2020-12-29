@@ -26,9 +26,24 @@ IMPROVEMENTS:
   more finely grained control of the handling of diagnostics messages.
   [[GH-3050]](https://github.com/fatih/vim-go/pull/3050)
   [[GH-3052]](https://github.com/fatih/vim-go/pull/3052)
+  [[GH-3119]](https://github.com/fatih/vim-go/pull/3119)
 * Add support for allowing `g:go_gopls_local`  to specify different local
   imports values per workspace.
   [[GH-3053]](https://github.com/fatih/vim-go/pull/3053)
+* Improve `:GoDecls` and `:GoDeclsDir` display.
+  [[GH-3081]](https://github.com/fatih/vim-go/pull/3081)
+* Preserve existing window layout when debugging and `g:go_debug_windows` is
+  empty.
+  [[GH-3068]](https://github.com/fatih/vim-go/pull/3068)
+* Show identifier in fzf's preview window with `:GoDecls` and `:GoDeclsDir`.
+  [[GH-3083]](https://github.com/fatih/vim-go/pull/3083)
+* Use `gopls` for `:GoCallers`.
+  [[GH-3088]](https://github.com/fatih/vim-go/pull/3088)
+  [[GH-3090]](https://github.com/fatih/vim-go/pull/3090)
+* Update denite integration to work with python3.9.
+  [[GH-3097]](https://github.com/fatih/vim-go/pull/3097)
+* Add syntax highlighting for go.sum files.
+  [[GH-3102]](https://github.com/fatih/vim-go/pull/3102)
 
 BUG FIXES:
 * Remove implications that terminal mode is only applied for Neovim.
@@ -46,6 +61,14 @@ BUG FIXES:
   [[GH-3047]](https://github.com/fatih/vim-go/pull/3047)
 * Handle gopls v0.5.2 addition of a prefix on the expected code actions names.
   [[GH-3077]](https://github.com/fatih/vim-go/pull/3077)
+* Make sure all buffers' mappings are restored when debugging stops.
+  [[GH-3048]](https://github.com/fatih/vim-go/pull/3048)
+* Return early when `g:go_referrers_modes` is `gopls` and `gopls` is disabled.
+  [[GH-3090]](https://github.com/fatih/vim-go/pull/3090)
+* Handle yet another error format produced by golangci-lint.
+  [[GH-3094]](https://github.com/fatih/vim-go/pull/3094)
+* Handle additional ways that gopls can provide links for godoc.
+  [[GH-3112]](https://github.com/fatih/vim-go/pull/3112)
 
 ## v1.24 - (September 15, 2020)
 

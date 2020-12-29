@@ -1560,9 +1560,9 @@ default this is enabled.
                                                            *'g:go_guru_scope'*
 
 Use this option to define the scope of the analysis to be passed for guru
-related commands, such as |:GoImplements|, |:GoCallers|, etc. You can change
-it on-the-fly with |:GoGuruScope|. The input should be a a list of package
-pattern. An example input might be:
+related commands, such as |:GoImplements|, |:GoChannelPeers|, etc. You can
+change it on-the-fly with |:GoGuruScope|. The input should be a a list of
+package pattern. An example input might be:
 `["github.com/fatih/color","github.com/fatih/structs"]`
 
 Also see |go-guru-scope|.
@@ -2471,7 +2471,8 @@ DEBUGGER SETTINGS~
 Controls the window layout for debugging mode. This is a |dict| with four
 possible keys: "vars", "stack", "goroutines", and "out"; each of the new
 windows will be created in that that order with the commands in the value. The
-current window is made the only window before creating the debug windows.
+current window is made the only window before creating the debug windows
+unless `g:go_debug_windows` is empty.
 
 A window will not be created if a key is missing or empty.
 
@@ -2514,7 +2515,7 @@ second item is for `:map-arguments`. All mappings will always be `:map-local`,
 so there is never a need to include `"<buffer>"` in the the arguments.
 >
   let g:go_debug_mappings = {
-    \ '(go-debug-continue)': {'key': 'c', 'arguments': '<nowait>'],
+    \ '(go-debug-continue)': {'key': 'c', 'arguments': '<nowait>'},
     \ '(go-debug-stop)': {'key': 'q'},
     \ '(go-debug-next)': {'key': 'n', 'arguments': '<nowait>'},
     \ '(go-debug-step)': {'key': 's'},
@@ -2597,6 +2598,13 @@ use of `gopls`, you may prefer to configure vim-go to share the `gopls`
 instance with other LSP plugins. 'g:go_gopls_options' can be used to configure
 how vim-go starts `gopls` so that the instance can be shared with other
 plugins and vim-go user's can leverage the full power of vim-go.
+
+I only want vim-go's syntax highlighting~
+
+Usually when users ask for this, they want to disable vim-go's features that
+take some action when a buffer is written to disk. The options that control
+those actions can be found in the vim-go help file. They all contain the
+string _auto in their names and most are suffixed with _autosave.
 
 I get a "Unknown function: go#config#..." error~
 
