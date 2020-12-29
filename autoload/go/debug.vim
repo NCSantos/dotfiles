@@ -440,16 +440,18 @@ endfunction
 
 function! s:start_cb() abort
   let l:winid = win_getid()
-  silent! only!
+  let l:debugwindows = go#config#DebugWindows()
+  if !empty(l:debugwindows)
+    silent! only!
+  endif
 
   let winnum = bufwinnr(bufnr('__GODEBUG_STACKTRACE__'))
   if winnum != -1
     return
   endif
 
-  let debugwindows = go#config#DebugWindows()
-  if has_key(debugwindows, "vars") && debugwindows['vars'] != ''
-    exe 'silent ' . debugwindows['vars']
+  if has_key(l:debugwindows, "vars") && l:debugwindows['vars'] != ''
+    exe 'silent ' . l:debugwindows['vars']
     silent file `='__GODEBUG_VARIABLES__'`
     setlocal buftype=nofile bufhidden=wipe nomodified nobuflisted noswapfile nowrap nonumber nocursorline
     setlocal filetype=godebugvariables
@@ -458,8 +460,8 @@ function! s:start_cb() abort
     nmap <buffer> q <Plug>(go-debug-stop)
   endif
 
-  if has_key(debugwindows, "stack") && debugwindows['stack'] != ''
-    exe 'silent ' . debugwindows['stack']
+  if has_key(l:debugwindows, "stack") && l:debugwindows['stack'] != ''
+    exe 'silent ' . l:debugwindows['stack']
     silent file `='__GODEBUG_STACKTRACE__'`
     setlocal buftype=nofile bufhidden=wipe nomodified nobuflisted noswapfile nowrap nonumber nocursorline
     setlocal filetype=godebugstacktrace
@@ -467,8 +469,8 @@ function! s:start_cb() abort
     nmap <buffer> q <Plug>(go-debug-stop)
   endif
 
-  if has_key(debugwindows, "goroutines") && debugwindows['goroutines'] != ''
-    exe 'silent ' . debugwindows['goroutines']
+  if has_key(l:debugwindows, "goroutines") && l:debugwindows['goroutines'] != ''
+    exe 'silent ' . l:debugwindows['goroutines']
     silent file `='__GODEBUG_GOROUTINES__'`
     setlocal buftype=nofile bufhidden=wipe nomodified nobuflisted noswapfile nowrap nonumber nocursorline
     setlocal filetype=godebugvariables
@@ -476,8 +478,8 @@ function! s:start_cb() abort
     nmap <buffer> <silent> <cr> :<c-u>call go#debug#Goroutine()<cr>
   endif
 
-  if has_key(debugwindows, "out") && debugwindows['out'] != ''
-    exe 'silent ' . debugwindows['out']
+  if has_key(l:debugwindows, "out") && l:debugwindows['out'] != ''
+    exe 'silent ' . l:debugwindows['out']
     silent file `='__GODEBUG_OUTPUT__'`
     setlocal buftype=nofile bufhidden=wipe nomodified nobuflisted noswapfile nowrap nonumber nocursorline
     setlocal filetype=godebugoutput
@@ -500,7 +502,7 @@ function! s:start_cb() abort
     autocmd! *
     call s:configureMappings('(go-debug-breakpoint)', '(go-debug-continue)')
   augroup END
-  doautocmd vim-go-debug FileType go
+  doautocmd vim-go-debug BufWinEnter *.go
 endfunction
 
 function! s:continue()
@@ -534,7 +536,7 @@ function! s:continue()
     autocmd! *
     call s:configureMappings('(go-debug-breakpoint)', '(go-debug-continue)', '(go-debug-halt)', '(go-debug-next)', '(go-debug-print)', '(go-debug-step)')
   augroup END
-  doautocmd vim-go-debug FileType go
+  doautocmd vim-go-debug BufWinEnter *.go
 endfunction
 
 function! s:err_cb(ch, msg) abort
@@ -1501,9 +1503,10 @@ function! s:configureMappings(...) abort
 
     let l:lhs = l:config.key
     try
-      call execute(printf('autocmd FileType go call s:save_maparg_for(expand(''%%''), ''%s'')', l:lhs))
+      call execute(printf('autocmd BufWinEnter *.go call s:save_maparg_for(expand(''%%''), ''%s'')', l:lhs))
+      call execute('autocmd BufWinLeave  *.go call s:restoreMappings()')
 
-      let l:mapping = 'autocmd FileType go nmap <buffer>'
+      let l:mapping = 'autocmd BufWinEnter *.go nmap <buffer>'
       if has_key(l:config, 'arguments')
         let l:mapping = printf('%s %s', l:mapping, l:config.arguments)
       endif
