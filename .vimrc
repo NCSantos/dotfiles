@@ -197,7 +197,7 @@ let surround_indent=1 " Automatically reindent text surround.vim actions
 
 set runtimepath+=~/.vim/snippets/xptemplate
 let g:xptemplate_key = '<leader>s'
-let g:xptemplate_brace_complete = '{(['
+" let g:xptemplate_brace_complete = '{(['
 
 """ Autocommands
 if has("autocmd")
