@@ -1,0 +1,99 @@
+# Test case that verifies we have a fix for github.com/govim/govim/issues/940
+# When we receive text edits from gopls, our internal AST wasn't updated leading
+# to panics when using signature help for example.
+
+# Open main.go that lacks import statement for "fmt"
+vim ex 'e main.go'
+[v8.2.3019] [go1.19] [!go1.20] vimexprwait errors.go119.v8.2.3019.golden GOVIMTest_getqflist()
+[!v8.2.3019] [go1.19] [!go1.20] vimexprwait errors.go119.golden GOVIMTest_getqflist()
+[v8.2.3019] [go1.20] vimexprwait errors.go120.v8.2.3019.golden GOVIMTest_getqflist()
+[!v8.2.3019] [go1.20] vimexprwait errors.go120.golden GOVIMTest_getqflist()
+
+# Save the file so the import statment is added (and cursor is moved)
+vim ex 'call cursor(4,15)'
+vim ex 'w!'
+vimexprwait errors.empty GOVIMTest_getqflist()
+
+# Now trigger signature help, did panic before since the new buffer content didn't match our AST
+vim ex ':GOVIMExperimentalSignatureHelp'
+
+# Assert that we have received no error (Type: 1) or warning (Type: 2) log messages
+# Disabled pending resolution to https://github.com/golang/go/issues/34103
+# errlogmatch -start -count=0 'LogMessage callback: &protocol\.LogMessageParams\{Type:(1|2), Message:".*'
+
+-- go.mod --
+module mod.com
+
+go 1.12
+-- main.go --
+package main
+
+func main() {
+	fmt.Println("")
+}
+-- errors.go119.golden --
+[
+  {
+    "bufname": "main.go",
+    "col": 2,
+    "lnum": 4,
+    "module": "",
+    "nr": 0,
+    "pattern": "",
+    "text": "undeclared name: fmt",
+    "type": "",
+    "valid": 1,
+    "vcol": 0
+  }
+]
+-- errors.go119.v8.2.3019.golden --
+[
+  {
+    "bufname": "main.go",
+    "col": 2,
+    "end_col": 0,
+    "end_lnum": 0,
+    "lnum": 4,
+    "module": "",
+    "nr": 0,
+    "pattern": "",
+    "text": "undeclared name: fmt",
+    "type": "",
+    "valid": 1,
+    "vcol": 0
+  }
+]
+-- errors.go120.golden --
+[
+  {
+    "bufname": "main.go",
+    "col": 2,
+    "lnum": 4,
+    "module": "",
+    "nr": 0,
+    "pattern": "",
+    "text": "undefined: fmt",
+    "type": "",
+    "valid": 1,
+    "vcol": 0
+  }
+]
+-- errors.go120.v8.2.3019.golden --
+[
+  {
+    "bufname": "main.go",
+    "col": 2,
+    "end_col": 0,
+    "end_lnum": 0,
+    "lnum": 4,
+    "module": "",
+    "nr": 0,
+    "pattern": "",
+    "text": "undefined: fmt",
+    "type": "",
+    "valid": 1,
+    "vcol": 0
+  }
+]
+-- errors.empty --
+[]

@@ -1,0 +1,72 @@
+# Verify that we don't receive initial diagnostics for files that have only
+# analysis errors. Then when we open any file in the package we receive
+# diagnostics for files that have analysis errors.
+
+[short] skip 'Skip short because we sleep for GOVIM_ERRLOGMATCH_WAIT to verify we haven''t received diagnostics'
+
+sleep $GOVIM_ERRLOGMATCH_WAIT
+errlogmatch -count=0 -start 'PublishDiagnostics callback: &protocol.PublishDiagnosticsParams{\n\S+:\s+URI:\s+"file://'$WORK/main.go
+errlogmatch -count=0 -start 'PublishDiagnostics callback: &protocol.PublishDiagnosticsParams{\n\S+:\s+URI:\s+"file://'$WORK/other.go
+
+vim ex 'e main.go'
+
+errlogmatch 'PublishDiagnostics callback: &protocol.PublishDiagnosticsParams{\n\S+:\s+URI:\s+"file://'$WORK/other.go
+[v8.2.3019] vimexprwait errors.v8.2.3019.golden GOVIMTest_getqflist()
+[!v8.2.3019] vimexprwait errors.golden GOVIMTest_getqflist()
+
+vim ex 'e other.go'
+
+[v8.2.3019] vimexprwait errors.v8.2.3019.golden GOVIMTest_getqflist()
+[!v8.2.3019] vimexprwait errors.golden GOVIMTest_getqflist()
+
+# Assert that we have received no error (Type: 1) or warning (Type: 2) log messages
+# Disabled pending resolution to https://github.com/golang/go/issues/34103
+# errlogmatch -start -count=0 'LogMessage callback: &protocol\.LogMessageParams\{Type:(1|2), Message:".*'
+
+-- go.mod --
+module mod.com
+
+go 1.12
+-- main.go --
+package main
+
+-- other.go --
+package main
+
+import "fmt"
+
+func main() {
+	fmt.Printf("%v")
+}
+-- errors.v8.2.3019.golden --
+[
+  {
+    "bufname": "other.go",
+    "col": 2,
+    "end_col": 0,
+    "end_lnum": 0,
+    "lnum": 6,
+    "module": "",
+    "nr": 0,
+    "pattern": "",
+    "text": "fmt.Printf format %v reads arg #1, but call has 0 args",
+    "type": "",
+    "valid": 1,
+    "vcol": 0
+  }
+]
+-- errors.golden --
+[
+  {
+    "bufname": "other.go",
+    "col": 2,
+    "lnum": 6,
+    "module": "",
+    "nr": 0,
+    "pattern": "",
+    "text": "fmt.Printf format %v reads arg #1, but call has 0 args",
+    "type": "",
+    "valid": 1,
+    "vcol": 0
+  }
+]

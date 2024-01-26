@@ -1,0 +1,253 @@
+# Test that the hover function works for triggering a hover "balloon"
+
+[!vim] [!gvim] skip 'Test only known to work in Vim and GVim'
+
+# Docs as popup content
+vim ex 'e main.go'
+vim ex 'call cursor(6,6)'
+vim expr 'GOVIMHover()'
+vim -stringout expr 'GOVIM_internal_DumpPopups()'
+cmp stdout popup.golden
+! stderr .+
+
+
+# Single warning (unreachable code) + docs as popup content
+vim call append '[5,"\treturn"]'
+vim ex 'call feedkeys(\"\\<CursorHold>\", \"xt\")'
+[v8.2.3019] vimexprwait warning.v8.2.3019.golden GOVIMTest_getqflist()
+[!v8.2.3019] vimexprwait warning.golden GOVIMTest_getqflist()
+vim expr 'GOVIMHover()'
+vim -stringout expr 'GOVIM_internal_DumpPopups()'
+cmp stdout warning_popup.golden
+! stderr .+
+
+
+# Two warnings (unreachable code + formatting directive %v) + docs
+vim ex '7s/Hello, world/%v/'
+vim ex 'call cursor(7,8)'
+[v8.2.3019] vimexprwait warnings.v8.2.3019.golden GOVIMTest_getqflist()
+[!v8.2.3019] vimexprwait warnings.golden GOVIMTest_getqflist()
+vim expr 'GOVIMHover()'
+vim -stringout expr 'GOVIM_internal_DumpPopups()'
+cmp stdout warnings_popup.golden
+! stderr .+
+
+
+# Two warnings, no docs
+vim ex 'call cursor(7,17)'
+vim expr 'GOVIMHover()'
+vim -stringout expr 'GOVIM_internal_DumpPopups()'
+cmp stdout warnings_nodoc_popup.golden
+! stderr .+
+
+
+# Error (compile error) as content content
+vim ex 'call cursor(6,1)'
+vim ex 'normal dd'
+vim ex 'call cursor(6,7)'
+vim ex 'normal x'
+[v8.2.3019] [go1.19] [!go1.20] vimexprwait error.go119.v8.2.3019.golden GOVIMTest_getqflist()
+[!v8.2.3019] [go1.19] [!go1.20] vimexprwait error.go119.golden GOVIMTest_getqflist()
+[v8.2.3019] [go1.20] vimexprwait error.go120.v8.2.3019.golden GOVIMTest_getqflist()
+[!v8.2.3019] [go1.20] vimexprwait error.go120.golden GOVIMTest_getqflist()
+vim expr 'GOVIMHover()'
+vim -stringout expr 'GOVIM_internal_DumpPopups()'
+[go1.19] [!go1.20] cmp stdout error_popup.go119.golden
+[go1.20] cmp stdout error_popup.go120.golden
+! stderr .+
+
+# Assert that we have received no error (Type: 1) or warning (Type: 2) log messages
+# Disabled pending resolution to https://github.com/golang/go/issues/34103
+# errlogmatch -start -count=0 'LogMessage callback: &protocol\.LogMessageParams\{Type:(1|2), Message:".*'
+
+-- go.mod --
+module mod.com
+
+go 1.12
+-- main.go --
+package main
+
+import "fmt"
+
+func main() {
+	fmt.Println("Hello, world")
+}
+-- popup.golden --
+func fmt.Println(a ...any) (n int, err error)
+Println formats using the default formats for its operands and writes to standard output.
+Spaces are always added between operands and a newline is appended.
+It returns the number of bytes written and any write error encountered.
+-- warning_popup.golden --
+unreachable code unreachable
+func fmt.Println(a ...any) (n int, err error)
+Println formats using the default formats for its operands and writes to standard output.
+Spaces are always added between operands and a newline is appended.
+It returns the number of bytes written and any write error encountered.
+-- warnings_popup.golden --
+fmt.Println call has possible Printf formatting directive %v printf
+unreachable code unreachable
+func fmt.Println(a ...any) (n int, err error)
+Println formats using the default formats for its operands and writes to standard output.
+Spaces are always added between operands and a newline is appended.
+It returns the number of bytes written and any write error encountered.
+-- warnings_nodoc_popup.golden --
+fmt.Println call has possible Printf formatting directive %v printf
+unreachable code unreachable
+-- error_popup.go119.golden --
+Pintln not declared by package fmt compiler
+-- error_popup.go120.golden --
+undefined: fmt.Pintln compiler
+-- warning.golden --
+[
+  {
+    "bufname": "main.go",
+    "col": 2,
+    "lnum": 7,
+    "module": "",
+    "nr": 0,
+    "pattern": "",
+    "text": "unreachable code",
+    "type": "",
+    "valid": 1,
+    "vcol": 0
+  }
+]
+-- warning.v8.2.3019.golden --
+[
+  {
+    "bufname": "main.go",
+    "col": 2,
+    "end_col": 0,
+    "end_lnum": 0,
+    "lnum": 7,
+    "module": "",
+    "nr": 0,
+    "pattern": "",
+    "text": "unreachable code",
+    "type": "",
+    "valid": 1,
+    "vcol": 0
+  }
+]
+-- warnings.golden --
+[
+  {
+    "bufname": "main.go",
+    "col": 2,
+    "lnum": 7,
+    "module": "",
+    "nr": 0,
+    "pattern": "",
+    "text": "fmt.Println call has possible Printf formatting directive %v",
+    "type": "",
+    "valid": 1,
+    "vcol": 0
+  },
+  {
+    "bufname": "main.go",
+    "col": 2,
+    "lnum": 7,
+    "module": "",
+    "nr": 0,
+    "pattern": "",
+    "text": "unreachable code",
+    "type": "",
+    "valid": 1,
+    "vcol": 0
+  }
+]
+-- warnings.v8.2.3019.golden --
+[
+  {
+    "bufname": "main.go",
+    "col": 2,
+    "end_col": 0,
+    "end_lnum": 0,
+    "lnum": 7,
+    "module": "",
+    "nr": 0,
+    "pattern": "",
+    "text": "fmt.Println call has possible Printf formatting directive %v",
+    "type": "",
+    "valid": 1,
+    "vcol": 0
+  },
+  {
+    "bufname": "main.go",
+    "col": 2,
+    "end_col": 0,
+    "end_lnum": 0,
+    "lnum": 7,
+    "module": "",
+    "nr": 0,
+    "pattern": "",
+    "text": "unreachable code",
+    "type": "",
+    "valid": 1,
+    "vcol": 0
+  }
+]
+-- error.go119.golden --
+[
+  {
+    "bufname": "main.go",
+    "col": 6,
+    "lnum": 6,
+    "module": "",
+    "nr": 0,
+    "pattern": "",
+    "text": "Pintln not declared by package fmt",
+    "type": "",
+    "valid": 1,
+    "vcol": 0
+  }
+]
+-- error.go119.v8.2.3019.golden --
+[
+  {
+    "bufname": "main.go",
+    "col": 6,
+    "end_col": 0,
+    "end_lnum": 0,
+    "lnum": 6,
+    "module": "",
+    "nr": 0,
+    "pattern": "",
+    "text": "Pintln not declared by package fmt",
+    "type": "",
+    "valid": 1,
+    "vcol": 0
+  }
+]
+-- error.go120.golden --
+[
+  {
+    "bufname": "main.go",
+    "col": 6,
+    "lnum": 6,
+    "module": "",
+    "nr": 0,
+    "pattern": "",
+    "text": "undefined: fmt.Pintln",
+    "type": "",
+    "valid": 1,
+    "vcol": 0
+  }
+]
+-- error.go120.v8.2.3019.golden --
+[
+  {
+    "bufname": "main.go",
+    "col": 6,
+    "end_col": 0,
+    "end_lnum": 0,
+    "lnum": 6,
+    "module": "",
+    "nr": 0,
+    "pattern": "",
+    "text": "undefined: fmt.Pintln",
+    "type": "",
+    "valid": 1,
+    "vcol": 0
+  }
+]
