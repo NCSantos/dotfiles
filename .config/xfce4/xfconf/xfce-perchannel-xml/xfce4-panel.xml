@@ -38,9 +38,9 @@
       <property name="size" type="uint" value="30"/>
       <property name="autohide-behavior" type="uint" value="2"/>
     </property>
+    <property name="dark-mode" type="bool" value="false"/>
   </property>
   <property name="plugins" type="empty">
-    <property name="plugin-1" type="string" value="applicationsmenu"/>
     <property name="plugin-2" type="string" value="actions"/>
     <property name="plugin-3" type="string" value="tasklist"/>
     <property name="plugin-15" type="string" value="separator">
@@ -53,9 +53,14 @@
       <property name="names-visible" type="array">
         <value type="string" value="vlc"/>
         <value type="string" value="networkmanager applet"/>
+        <value type="string" value="task manager"/>
         <value type="string" value="steam"/>
+        <value type="string" value="thunar"/>
+      </property>
+      <property name="known-legacy-items" type="array">
         <value type="string" value="task manager"/>
         <value type="string" value="thunar"/>
+        <value type="string" value="networkmanager applet"/>
       </property>
     </property>
     <property name="plugin-7" type="string" value="showdesktop"/>
@@ -98,5 +103,6 @@
         <value type="string" value="14766465812.desktop"/>
       </property>
     </property>
+    <property name="plugin-1" type="string" value="applicationsmenu"/>
   </property>
 </channel>

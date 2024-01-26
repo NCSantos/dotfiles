@@ -244,6 +244,11 @@ if has("autocmd")
     au Filetype go nmap <silent> <leader>gf <Plug>(go-def-vertical)
     au Filetype go nmap <silent> <leader>gtf <Plug>(go-test-func)
   augroup END
+
+  augroup php
+    au Filetype twig set ft=html
+    au Filetype php nmap <silent> <leader>lf :g/function .*(<CR>
+  augroup END
 endif
 
 """ Colorscheme
