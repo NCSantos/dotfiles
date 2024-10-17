@@ -101,6 +101,7 @@ set formatoptions+=1 " break before, not after, a 1 letter word
 
 """" Display
 set number " Display line numbers
+set relativenumber
 set numberwidth=1 " using only 1 column (and 1 space) while possible
 set cursorline
 
@@ -127,7 +128,8 @@ set shortmess+=a " Use [+]/[RO]/[w] for modified/readonly/written.
 set ruler " Show some info, even without statuslines.
 set laststatus=2 " Always show statusline, even if only 1 window.
 
-set statusline=%<%F%h%m%r%h%w\ %y\ [BUF=%n]\ %{&ff}%=\ lin:%l\,%L\ col:%c%V\ pos:%o\%#warningmsg#%{go#statusline#Show()}%*\ %P
+" set statusline=%<%F%h%m%r%h%w\ %y\ [BUF=%n]\ %{&ff}%=\ lin:%l\,%L\ col:%c%V\ pos:%o\%#warningmsg#%{go#statusline#Show()}%*\ %P
+set statusline=%<%F%h%m%r%h%w\ %y\ [BUF=%n]\ %{&ff}%=\ lin:%l\,%L\ col:%c%V\ pos:%o\%#warningmsg#%*\ %P
 
 """" Tabs/Indent Levels
 set autoindent " Do dumb autoindentation when no filetype is set
@@ -238,11 +240,14 @@ if has("autocmd")
     au Filetype go exec "set listchars+=trail:" . nr2char(8901)
     au Filetype go exec "set listchars+=nbsp:" . nr2char(8901)
 
-    au Filetype go nmap <silent> <leader>gi <Plug>(go-imports)
-    au Filetype go nmap <silent> <leader>gb :wa<CR><bar><Plug>(go-build)
-    au Filetype go nmap <silent> <leader>gd :GoDecls<CR>
-    au Filetype go nmap <silent> <leader>gf <Plug>(go-def-vertical)
-    au Filetype go nmap <silent> <leader>gtf <Plug>(go-test-func)
+    " au Filetype go nmap <silent> <leader>gi <Plug>(go-imports)
+    " au Filetype go nmap <silent> <leader>gb :wa<CR><bar><Plug>(go-build)
+    " au Filetype go nmap <silent> <leader>gd :GoDecls<CR>
+    " au Filetype go nmap <silent> <leader>gf <Plug>(go-def-vertical)
+    " au Filetype go nmap <silent> <leader>gtf <Plug>(go-test-func)
+
+    au Filetype go nmap <silent> <Leader>h : <C-u>call GOVIMHover()<CR>
+
   augroup END
 
   augroup php
