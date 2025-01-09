@@ -141,13 +141,3 @@ case ":${PATH:=$gohomebin}:" in
 esac
 
 alias dotfiles='/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'
-
-flutterbin=~/Documents/flutter/flutter/bin
-
-case ":${PATH:=$flutterbin}:" in
-  *:$flutterbin:*) ;;
-  *) PATH="$PATH:$flutterbin"  ;;
-esac
-
-export ANDROID_HOME=~/Downloads/sdk-tools
-export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/
